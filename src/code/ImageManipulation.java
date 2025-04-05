@@ -1,5 +1,6 @@
 package code;
 
+import image.APImage;
 import image.Pixel;
 
 public class ImageManipulation {
@@ -8,8 +9,15 @@ public class ImageManipulation {
      *  Write a statement that will display the image in a window
      */
     public static void main(String[] args) {
+        String photoName = "cyberpunk2077.jpg";
+        APImage image = new APImage("cyberpunk2077.jpg");
+        image.draw();
 
-
+        grayScale(photoName);
+        blackAndWhite(photoName);
+        edgeDetection(photoName, 20);
+        reflectImage(photoName);
+        rotateImage(photoName);
     }
 
     /** CHALLENGE ONE: Grayscale
@@ -21,7 +29,19 @@ public class ImageManipulation {
      * Calculate the average of the red, green, and blue components of the pixel.
      * Set the red, green, and blue components to this average value. */
     public static void grayScale(String pathOfFile) {
+        APImage image = new APImage(pathOfFile);
 
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                Pixel p = image.getPixel(x, y);
+                int average = getAverageColour(p);
+                p.setRed(average);
+                p.setGreen(average);
+                p.setBlue(average);
+            }
+        }
+
+        image.draw();
     }
 
     /** A helper method that can be used to assist you in each challenge.
@@ -30,7 +50,9 @@ public class ImageManipulation {
      * @return the average RGB value
      */
     private static int getAverageColour(Pixel pixel) {
-        return 0;
+        int average = (pixel.getRed() + pixel.getGreen() + pixel.getBlue()) / 3;
+
+        return average;
     }
 
     /** CHALLENGE TWO: Black and White
@@ -43,7 +65,26 @@ public class ImageManipulation {
      * If the average is less than 128, set the pixel to black
      * If the average is equal to or greater than 128, set the pixel to white */
     public static void blackAndWhite(String pathOfFile) {
+        APImage image = new APImage(pathOfFile);
 
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                Pixel p = image.getPixel(x, y);
+                int average = getAverageColour(p);
+
+                if (average < 128) {
+                    p.setRed(0);
+                    p.setGreen(0);
+                    p.setBlue(0);
+                } else {
+                    p.setRed(255);
+                    p.setGreen(255);
+                    p.setBlue(255);
+                }
+            }
+        }
+
+        image.draw();
     }
 
     /** CHALLENGE Three: Edge Detection
@@ -69,7 +110,28 @@ public class ImageManipulation {
      * edge detection to an image using a threshold of 35
      *  */
     public static void edgeDetection(String pathToFile, int threshold) {
+        APImage image = new APImage(pathToFile);
+        APImage result = image.clone();
 
+        for (int y = 0; y < image.getHeight() - 1; y++) {
+            for (int x = 1; x < image.getWidth(); x++) {
+                Pixel current = image.getPixel(x, y);
+                Pixel left = image.getPixel(x - 1, y);
+                Pixel below = image.getPixel(x, y + 1);
+
+                int currentAvg = getAverageColour(current);
+                int leftAvg = getAverageColour(left);
+                int belowAvg = getAverageColour(below);
+
+                if (Math.abs(currentAvg - leftAvg) > threshold || Math.abs(currentAvg - belowAvg) > threshold) {
+                    result.setPixel(x, y, new Pixel(0, 0, 0)); // black
+                } else {
+                    result.setPixel(x, y, new Pixel(255, 255, 255)); // white
+                }
+            }
+        }
+
+        result.draw();
     }
 
     /** CHALLENGE Four: Reflect Image
@@ -79,7 +141,20 @@ public class ImageManipulation {
      *
      */
     public static void reflectImage(String pathToFile) {
+        APImage image = new APImage(pathToFile);
+        int width = image.getWidth();
 
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < width / 2; x++) {
+                Pixel left = image.getPixel(x, y);
+                Pixel right = image.getPixel(width - 1 - x, y);
+
+                image.setPixel(x, y, right);
+                image.setPixel(width - 1 - x, y, left);
+            }
+        }
+
+        image.draw();
     }
 
     /** CHALLENGE Five: Rotate Image
@@ -89,7 +164,19 @@ public class ImageManipulation {
      *
      *  */
     public static void rotateImage(String pathToFile) {
+        APImage image = new APImage(pathToFile);
+        int width = image.getWidth();
+        int height = image.getHeight();
+        APImage rotated = new APImage(height, width);
 
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Pixel originalPixel = image.getPixel(x, y);
+                rotated.setPixel(height - 1 - y, x, originalPixel);
+            }
+        }
+
+        rotated.draw();
     }
 
 }
